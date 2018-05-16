@@ -123,9 +123,15 @@ def question_new(request):
 
 def choice_add(request, question_id):
         question = Question.objects.get(id = question_id)
+        cresponse = question.correct_response
         try:
             numch = Choice.objects.filter(question_id = question_id).count()
         except Choice.DoesNotExist as e: #Por si no se ha creado respuesta anteriormente para la pregunta
+            if cresponse==1:
+                info_message = "La respuesta que escriba a continuación será la respuesta correcta de la pregunta."
+            else:
+                info_message = "Esta respuesta será incorrecta. La respuesta correcta será la respuesta número " + str(cresponse) + "."
+
             if request.method =='POST':
                 form = ChoiceForm(request.POST)
                 if form.is_valid():
@@ -136,11 +142,21 @@ def choice_add(request, question_id):
                     #form.save()
                     return render(request, 'polls/choice_new.html', {'title':'Pregunta:'+ question.question_text,
                         'form': form,
-                        'sucess_message': "¡Respuesta insertada correctamente a la pregunta " + question_id + "!",
+                        'info_message': info_message,
+                        'sucess_message': "¡Respuesta insertada correctamente a la pregunta " + str(question_id) + "!",
                     })
             else: 
                 form = ChoiceForm()
-            return render(request, 'polls/choice_new.html', {'title':'Pregunta:'+ question.question_text,'form': form})
+
+            return render(request, 'polls/choice_new.html', {'title':'Pregunta:'+ question.question_text,
+                'form': form,
+                'info_message': info_message,
+            })
+
+        if cresponse==numch+1:
+            info_message = "La respuesta que escriba a continuación será la respuesta correcta de la pregunta."
+        else:
+            info_message = "Esta respuesta será incorrecta. La respuesta correcta será la respuesta número " + str(cresponse) + "."
 
         if request.method =='POST':
             form = ChoiceForm(request.POST)
@@ -153,17 +169,24 @@ def choice_add(request, question_id):
                     #form.save()
                     return render(request, 'polls/choice_new.html', {'title':'Pregunta:'+ question.question_text,
                         'form': form,
-                        'sucess_message': "¡Respuesta insertada correctamente a la pregunta " + question_id + "!",
+                        'info_message': info_message,
+                        'sucess_message': "¡Respuesta insertada correctamente a la pregunta " + str(question_id) + "!",
                     })
                 else:
                     return render(request, 'polls/choice_new.html', {
                         'form': form,
+                        'info_message': info_message,
                         'error_message': "ERROR: El número de respuestas no debe pasarse de las opciones declaradas en la pregunta.",
                     })
         else: 
             form = ChoiceForm()
+
         #return render_to_response ('choice_new.html', {'form': form, 'poll_id': poll_id,}, context_instance = RequestContext(request),)
-        return render(request, 'polls/choice_new.html', {'title':'Pregunta:'+ question.question_text,'form': form,})
+
+        return render(request, 'polls/choice_new.html', {'title':'Pregunta:'+ question.question_text,
+            'form': form,
+            'info_message': info_message,
+        })
 
 def chart(request, question_id):
     q=Question.objects.get(id = question_id)
