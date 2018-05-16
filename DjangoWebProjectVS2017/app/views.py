@@ -98,9 +98,13 @@ def question_new(request):
                 question.save()
                 #return redirect('detail', pk=question_id)
                 #return render(request, 'polls/index.html', {'title':'Respuestas posibles','question': question})
+                return render(request, 'polls/question_new.html', {
+                    'form': form,
+                    'sucess_message': "¡Pregunta insertada correctamente!",
+                })
         else:
             form = QuestionForm()
-        return render(request, 'polls/question_new.html', {'form': form})
+        return render(request, 'polls/question_new.html', {'form': form,})
     except Exception as e:
         # Vuelve a mostrar el form.
         return render(request, 'polls/question_new.html', {
@@ -110,18 +114,47 @@ def question_new(request):
 
 def choice_add(request, question_id):
         question = Question.objects.get(id = question_id)
+        try:
+            numch = Choice.objects.filter(question_id = question_id).count()
+        except Choice.DoesNotExist as e: #Por si no se ha creado respuesta anteriormente para la pregunta
+            if request.method =='POST':
+                form = ChoiceForm(request.POST)
+                if form.is_valid():
+                    choice = form.save(commit = False)
+                    choice.question = question
+                    choice.vote = 0
+                    choice.save()
+                    #form.save()
+                    return render(request, 'polls/choice_new.html', {'title':'Pregunta:'+ question.question_text,
+                        'form': form,
+                        'sucess_message': "¡Respuesta insertada correctamente a la pregunta " + question_id + "!",
+                    })
+            else: 
+                form = ChoiceForm()
+            return render(request, 'polls/choice_new.html', {'title':'Pregunta:'+ question.question_text,'form': form})
+
         if request.method =='POST':
             form = ChoiceForm(request.POST)
             if form.is_valid():
-                choice = form.save(commit = False)
-                choice.question = question
-                choice.vote = 0
-                choice.save()
-                #form.save()
+                if(numch+1<=question.choice_max):
+                    choice = form.save(commit = False)
+                    choice.question = question
+                    choice.vote = 0
+                    choice.save()
+                    #form.save()
+                    return render(request, 'polls/choice_new.html', {'title':'Pregunta:'+ question.question_text,
+                        'form': form,
+                        'sucess_message': "¡Respuesta insertada correctamente a la pregunta " + question_id + "!",
+                    })
+                else:
+                    return render(request, 'polls/choice_new.html', {
+                        'form': form,
+                        'error_message': "ERROR: El número de respuestas no debe pasarse de las opciones declaradas en la pregunta.",
+                    })
         else: 
             form = ChoiceForm()
         #return render_to_response ('choice_new.html', {'form': form, 'poll_id': poll_id,}, context_instance = RequestContext(request),)
-        return render(request, 'polls/choice_new.html', {'title':'Pregunta:'+ question.question_text,'form': form})
+        return render(request, 'polls/choice_new.html', {'title':'Pregunta:'+ question.question_text,'form': form,})
 
 def chart(request, question_id):
     q=Question.objects.get(id = question_id)
