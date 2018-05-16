@@ -54,13 +54,22 @@ def about(request):
         }
     )
 def index(request):
-    latest_question_list = Question.objects.order_by('-pub_date')
+    latest_question_list = Question.objects.order_by('question_topic').values_list('question_topic', flat=True).distinct()
     template = loader.get_template('polls/index.html')
     context = {
-                'title':'Lista de preguntas de la encuesta',
+                'title':'Lista de temas de las encuestas',
                 'latest_question_list': latest_question_list,
               }
     return render(request, 'polls/index.html', context)
+
+def topic(request, topic):
+    question_list = Question.objects.filter(question_topic = topic)
+    template = loader.get_template('polls/topic.html')
+    context = {
+                'title':'Lista de preguntas del tema' + topic,
+                'question_list': question_list,
+              }
+    return render(request, 'polls/topic.html', context)
 
 def detail(request, question_id):
      question = get_object_or_404(Question, pk=question_id)
