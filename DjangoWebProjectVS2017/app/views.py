@@ -35,8 +35,8 @@ def contact(request):
         request,
         'app/contact.html',
         {
-            'title':'Autor de la web',
-            'message':'Datos de contacto',
+            'title':'Autores de la web',
+            'message':'Datos de los contactos',
             'year':datetime.now().year,
         }
     )
@@ -89,6 +89,7 @@ def vote(request, question_id):
         return HttpResponseRedirect(reverse('results', args=(p.id,)))
 
 def question_new(request):
+    try:
         if request.method == "POST":
             form = QuestionForm(request.POST)
             if form.is_valid():
@@ -100,6 +101,12 @@ def question_new(request):
         else:
             form = QuestionForm()
         return render(request, 'polls/question_new.html', {'form': form})
+    except Exception as e:
+        # Vuelve a mostrar el form.
+        return render(request, 'polls/question_new.html', {
+            'form': form,
+            'error_message': "ERROR: El número de respuestas debe ser 2 o 4 y la respuesta correcta no debe pasarse del rango del tipo máximo.",
+        })
 
 def choice_add(request, question_id):
         question = Question.objects.get(id = question_id)
@@ -109,7 +116,7 @@ def choice_add(request, question_id):
                 choice = form.save(commit = False)
                 choice.question = question
                 choice.vote = 0
-                choice.save()         
+                choice.save()
                 #form.save()
         else: 
             form = ChoiceForm()

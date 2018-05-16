@@ -8,6 +8,9 @@ from django.db.models.fields import CharField
 # Create your models here.
 class Question(models.Model):
     question_text = models.CharField(max_length=200)
+    question_topic = models.CharField(max_length=200)
+    correct_response = models.IntegerField()
+    choice_max = models.IntegerField()
     pub_date = models.DateTimeField('date published')
 
 class Choice(models.Model):
