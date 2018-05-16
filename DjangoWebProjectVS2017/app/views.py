@@ -66,7 +66,7 @@ def topic(request, topic):
     question_list = Question.objects.filter(question_topic = topic)
     template = loader.get_template('polls/topic.html')
     context = {
-                'title':'Lista de preguntas del tema' + topic,
+                'title':'Lista de preguntas del tema ' + topic,
                 'question_list': question_list,
               }
     return render(request, 'polls/topic.html', context)
