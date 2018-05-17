@@ -10,7 +10,12 @@
 {% csrf_token %}
 {% for choice in question.choice_set.all %}
     <input type="radio" name="choice" id="choice{{ forloop.counter }}" value="{{ choice.id }}" />
-    <label for="choice{{ forloop.counter }}">{{ choice.choice_text }}</label><br />
+    {% if forloop.counter == question.correct_response and request.user.is_authenticated %}
+        <label for="choice{{ forloop.counter }}">{{ choice.choice_text }}</label>&lt;--- Respuesta correcta<br />  
+    {% else %}
+        <label for="choice{{ forloop.counter }}">{{ choice.choice_text }}</label><br />
+    {% endif %}
+
 {% endfor %}
 {% if request.user.is_authenticated %}
     <a href="{% url 'choice_add' question.id %}"><h3>Insertar Opciones</h3></a> 

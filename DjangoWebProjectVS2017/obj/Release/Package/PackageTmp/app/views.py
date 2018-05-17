@@ -114,7 +114,8 @@ def question_new(request):
         else:
             form = QuestionForm()
         return render(request, 'polls/question_new.html', {'form': form,})
-    except Exception as e:
+    except Exception as e: 
+        #El control de que las opciones sean de 2 o 4 respuestas está realizado en la base de datos, esta parte se ejecutará cuando se detecte error operacional.
         # Vuelve a mostrar el form.
         return render(request, 'polls/question_new.html', {
             'form': form,
@@ -126,7 +127,9 @@ def choice_add(request, question_id):
         cresponse = question.correct_response
         try:
             numch = Choice.objects.filter(question_id = question_id).count()
-        except Choice.DoesNotExist as e: #Por si no se ha creado respuesta anteriormente para la pregunta
+        except Choice.DoesNotExist as e: #Por si no se ha creado respuesta anteriormente para la pregunta.
+            info_question = "Esta pregunta admite " + str(question.choice_max) + " respuestas. Actualmente no hay ninguna respuesta escrita."
+
             if cresponse==1:
                 info_message = "La respuesta que escriba a continuación será la respuesta correcta de la pregunta."
             else:
@@ -142,6 +145,7 @@ def choice_add(request, question_id):
                     #form.save()
                     return render(request, 'polls/choice_new.html', {'title':'Pregunta:'+ question.question_text,
                         'form': form,
+                        'info_question': info_question,
                         'info_message': info_message,
                         'sucess_message': "¡Respuesta insertada correctamente a la pregunta " + str(question_id) + "!",
                     })
@@ -150,13 +154,20 @@ def choice_add(request, question_id):
 
             return render(request, 'polls/choice_new.html', {'title':'Pregunta:'+ question.question_text,
                 'form': form,
+                'info_question': info_question,
                 'info_message': info_message,
             })
 
-        if cresponse==numch+1:
-            info_message = "La respuesta que escriba a continuación será la respuesta correcta de la pregunta."
+        if(numch+1>question.choice_max):
+            info_question = "Esta pregunta no admite más respuestas. Su límite de respuestas es de " + str(question.choice_max) + " respuestas."
+            info_message = ""
         else:
-            info_message = "Esta respuesta será incorrecta. La respuesta correcta será la respuesta número " + str(cresponse) + "."
+            if cresponse==numch+1:
+                info_message = "La respuesta que escriba a continuación será la respuesta correcta de la pregunta."
+            else:
+                info_message = "Esta respuesta será incorrecta. La respuesta correcta será la respuesta número " + str(cresponse) + "."
+
+            info_question = "Esta pregunta admite " + str(question.choice_max) + " respuestas. Actualmente hay escritas " + str(numch) + " respuesta/s." 
 
         if request.method =='POST':
             form = ChoiceForm(request.POST)
@@ -169,12 +180,14 @@ def choice_add(request, question_id):
                     #form.save()
                     return render(request, 'polls/choice_new.html', {'title':'Pregunta:'+ question.question_text,
                         'form': form,
+                        'info_question': info_question,
                         'info_message': info_message,
                         'sucess_message': "¡Respuesta insertada correctamente a la pregunta " + str(question_id) + "!",
                     })
                 else:
                     return render(request, 'polls/choice_new.html', {
                         'form': form,
+                        'info_question': info_question,
                         'info_message': info_message,
                         'error_message': "ERROR: El número de respuestas no debe pasarse de las opciones declaradas en la pregunta.",
                     })
@@ -185,6 +198,7 @@ def choice_add(request, question_id):
 
         return render(request, 'polls/choice_new.html', {'title':'Pregunta:'+ question.question_text,
             'form': form,
+            'info_question': info_question,
             'info_message': info_message,
         })
 
