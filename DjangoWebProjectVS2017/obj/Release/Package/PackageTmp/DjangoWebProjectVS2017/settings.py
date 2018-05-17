@@ -26,7 +26,7 @@ SECRET_KEY = '8255f868-04d2-4fb5-b027-a5d126389d18'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['proyectodjangotjosebamiguela.azurewebsites.net','localhost']
 
 
 # Application definition
