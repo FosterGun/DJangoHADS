@@ -114,7 +114,8 @@ def question_new(request):
         else:
             form = QuestionForm()
         return render(request, 'polls/question_new.html', {'form': form,})
-    except Exception as e:
+    except Exception as e: 
+        #El control de que las opciones sean de 2 o 4 respuestas está realizado en la base de datos, esta parte se ejecutará cuando se detecte error operacional.
         # Vuelve a mostrar el form.
         return render(request, 'polls/question_new.html', {
             'form': form,
@@ -126,7 +127,7 @@ def choice_add(request, question_id):
         cresponse = question.correct_response
         try:
             numch = Choice.objects.filter(question_id = question_id).count()
-        except Choice.DoesNotExist as e: #Por si no se ha creado respuesta anteriormente para la pregunta
+        except Choice.DoesNotExist as e: #Por si no se ha creado respuesta anteriormente para la pregunta.
             info_question = "Esta pregunta admite " + str(question.choice_max) + " respuestas. Actualmente no hay ninguna respuesta escrita."
 
             if cresponse==1:
